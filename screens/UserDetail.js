@@ -26,22 +26,22 @@ function UserDetail({
       <ScrollableTabView
         tabBarInactiveTextColor={'black'}
         tabBarActiveTextColor={'black'}
-        initialPage={1}
+        initialPage={0}
       >
         <DetailSection
-          key={1}
+          key={0}
           tabLabel="Detail"
           navigation={navigation}
           userId={userId}
         />
         <PostSection
-          key={2}
+          key={1}
           tabLabel="Post"
           navigation={navigation}
           userId={userId}
         />
         <TodoSection
-          key={3}
+          key={2}
           tabLabel="Todo"
           navigation={navigation}
           userId={userId}
