@@ -9,18 +9,22 @@ import {
 import Loading from '../components/Loading'
 import { useQuery } from 'react-query'
 
-function Comments() {
+function PostDetail({
+  route: {
+    params: { postId = '' },
+  },
+}) {
   const { isLoading, data = null } = useQuery('postDetail', () =>
-    fetch('https://jsonplaceholder.typicode.com/posts/1').then(res =>
+    fetch(`https://jsonplaceholder.typicode.com/posts/${postId}`).then(res =>
       res.json()
     )
   )
   const { isLoading: isLoadingComments, data: list = [] } = useQuery(
     'comments',
     () =>
-      fetch('https://jsonplaceholder.typicode.com/posts/1/comments').then(res =>
-        res.json()
-      )
+      fetch(
+        `https://jsonplaceholder.typicode.com/posts/${postId}/comments`
+      ).then(res => res.json())
   )
   const renderHeader = () => {
     if (data)
@@ -70,6 +74,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     marginBottom: 16,
+    fontWeight: 'bold',
   },
   detailWrapper: {
     backgroundColor: 'white',
@@ -81,4 +86,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default Comments
+export default PostDetail

@@ -21,6 +21,7 @@
     "react-native": "0.64.3",
     "react-native-safe-area-context": "^4.2.4",
     "react-native-screens": "^3.13.1",
+    "react-native-scrollable-tab-view-forked": "^1.1.4",
     "react-native-web": "0.17.1",
     "react-query": "^3.34.19"
   },

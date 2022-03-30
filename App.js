@@ -5,8 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import HomeScreen from './screens/HomeScreen'
 import UserDetail from './screens/UserDetail'
 import PhotoAlbum from './screens/PhotoAlbum'
-import Todos from './screens/Todos'
-import Posts from './screens/Posts'
+import PostDetail from './screens/PostDetail'
 import { QueryClient, QueryClientProvider } from 'react-query'
 
 const Stack = createNativeStackNavigator()
@@ -20,8 +19,7 @@ export default function App() {
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="User Detail" component={UserDetail} />
           <Stack.Screen name="Album" component={PhotoAlbum} />
-          <Stack.Screen name="Todos" component={Todos} />
-          <Stack.Screen name="Posts" component={Posts} />
+          <Stack.Screen name="Post detail" component={PostDetail} />
         </Stack.Navigator>
       </NavigationContainer>
     </QueryClientProvider>

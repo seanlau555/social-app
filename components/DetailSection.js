@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
+  FlatList,
   View,
   Pressable,
   TouchableOpacity,
@@ -12,83 +13,39 @@ import {
 } from 'react-native'
 import Loading from '../components/Loading'
 import { useQuery } from 'react-query'
-import TodoSection from '../components/TodoSection'
-import {
-  ScrollableTabView,
-  DefaultTabBar,
-  ScrollableTabBar,
-} from '@valdio/react-native-scrollable-tabview'
 
 const { height, width } = Dimensions.get('window')
 
-function UserDetail({
-  navigation,
-  route: {
-    params: { userId = '' },
-  },
-}) {
+function UserDetail({ navigation, userId }) {
   const [modalVisible, setModalVisible] = useState(false)
 
+  const { isLoading: isLoadingAlbum, data: album = [] } = useQuery(
+    'albums',
+    () =>
+      fetch(`https://jsonplaceholder.typicode.com/albums`).then(res =>
+        res.json()
+      )
+  )
   const { isLoading, data = null } = useQuery('userDetail', () =>
     fetch(`https://jsonplaceholder.typicode.com/users/${userId}`).then(res =>
       res.json()
     )
   )
+  const filteredAlbum = useMemo(
+    () => album.filter(x => x.userId === userId),
+    [album]
+  )
+
   const onPressAddress = () => {
     setModalVisible(true)
   }
-  const onPressAlbum = () => {
+  const onPressAlbumDetail = item => {
     if (navigation) {
-      navigation.push('Album', { albumId: 1 })
+      navigation.push('Album', { albumId: item.id })
     }
   }
-  const onPressTodos = () => {
-    if (navigation) {
-      navigation.push('Todos')
-    }
-  }
-  const onPressPosts = () => {
-    if (navigation) {
-      navigation.push('Posts')
-    }
-  }
-  if (isLoading && !data) return <Loading />
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollableTabView>
-        <TodoSection tabLabel="Detail" />
-        <TodoSection tabLabel="Todo" />
-      </ScrollableTabView>
-      <Modal
-        style={{ height: 300 }}
-        animationType="slide"
-        transparent={false}
-        visible={modalVisible}
-        onRequestClose={() => {
-          Alert.alert('Modal has been closed.')
-          setModalVisible(!modalVisible)
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.name}>Address</Text>
-            <Text style={styles.username}>Street: {data.address.street}</Text>
-            <Text style={styles.username}>Suite: {data.address.suite}</Text>
-            <Text style={styles.username}>City: {data.address.city}</Text>
-            <Text style={styles.username}>Zipcode: {data.address.zipcode}</Text>
-            <Text style={styles.username}>
-              Geo location: {data.address.geo.lat}, {data.address.geo.lng}
-            </Text>
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}
-            >
-              <Text style={styles.textStyle}>Hide Address</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
-
+  const renderHeader = () => {
+    return (
       <View style={styles.wrapper}>
         <Text style={styles.name}>{data.name}</Text>
         <Text style={styles.username}>@{data.username}</Text>
@@ -118,24 +75,71 @@ function UserDetail({
             </TouchableOpacity>
           )}
         </View>
-        <View style={styles.sections}>
-          <TouchableOpacity style={styles.buttonSection} onPress={onPressAlbum}>
-            <Text>Photo album</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonSection} onPress={onPressTodos}>
-            <Text>Todos</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonSection} onPress={onPressPosts}>
-            <Text>Posts</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.subTitle}>Album</Text>
       </View>
+    )
+  }
+  if (isLoading && isLoadingAlbum) return <Loading />
+  return (
+    <SafeAreaView style={styles.container}>
+      <Modal
+        style={{ height: 300 }}
+        animationType="slide"
+        transparent={false}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.')
+          setModalVisible(!modalVisible)
+        }}
+      >
+        <View style={styles.centeredView}>
+          {data.address && (
+            <View style={styles.modalView}>
+              <Text style={styles.name}>Address</Text>
+              <Text style={styles.username}>Street: {data.address.street}</Text>
+              <Text style={styles.username}>Suite: {data.address.suite}</Text>
+              <Text style={styles.username}>City: {data.address.city}</Text>
+              <Text style={styles.username}>
+                Zipcode: {data.address.zipcode}
+              </Text>
+              <Text style={styles.username}>
+                Geo location: {data.address.geo.lat}, {data.address.geo.lng}
+              </Text>
+              <Pressable
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => setModalVisible(!modalVisible)}
+              >
+                <Text style={styles.textStyle}>Hide Address</Text>
+              </Pressable>
+            </View>
+          )}
+        </View>
+      </Modal>
+
+      <FlatList
+        style={{ backgroundColor: '#eee' }}
+        data={filteredAlbum}
+        keyExtractor={item => item.id}
+        ListHeaderComponent={renderHeader}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.item}
+            onPress={() => onPressAlbumDetail(item)}
+          >
+            <Text>Album name: {item.title}</Text>
+          </TouchableOpacity>
+        )}
+      />
     </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
-  sectionButton: {},
+  subTitle: {
+    marginTop: 32,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
   indent: {
     marginLeft: 32,
   },
@@ -144,8 +148,15 @@ const styles = StyleSheet.create({
     marginTop: StatusBar.currentHeight || 0,
     backgroundColor: 'white',
   },
+  item: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    marginVertical: 8,
+    backgroundColor: 'white',
+  },
   wrapper: {
-    padding: 32,
+    backgroundColor: 'white',
+    padding: 20,
   },
   name: {
     fontSize: 28,
